@@ -21,7 +21,7 @@ public class MenuUtility {
 	private static void displayMenuOptions() throws SQLException {
 		
 		System.out.println("To choose an option, enter its number:");
-		System.out.println("1: Enter a query to calculate its cost");
+		System.out.println("1: Calculate cost of a SQL query (input should be provided strictly in line with the required format)");
 		System.out.println("2: Look at stats");
 		
 		String selectedOption = scanGlobal.nextLine();
@@ -43,6 +43,7 @@ public class MenuUtility {
 	}
 
 	private static void queryProcessor() throws SQLException {
+		System.out.println("----Please Write a Query----");
 		String inputQuery = scanGlobal.nextLine();
 		queryUtilPackage.QueryUtility.parseQuery(inputQuery);
 	}

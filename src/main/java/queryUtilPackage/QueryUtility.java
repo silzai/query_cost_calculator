@@ -8,7 +8,7 @@ public class QueryUtility {
 	
 	private static DataBuffer dataBuffer = new DataBuffer();
 	
-	//parseQuery hardcoded with relevant input only
+	//hardcoded with relevant input only
 	public static void parseQuery(String inputQuery) throws SQLException {
 		
 		String[] tokenizedInput = inputQuery.split(" ");
@@ -17,67 +17,79 @@ public class QueryUtility {
 		String selectionAttribute = tokenizedInput[tokenizedInput.length-3];
 		//checking if there are two tables present, so then will do JOIN
 		String selectionTableCheck = tokenizedInput[3];
+		String selectionTable;
+		String selectionTable2 = "";
 		if (selectionTableCheck.contains(",")) {
-			String selectionTable = selectionTableCheck.split(",")[0];
-			String selectionTable2 = selectionTableCheck.split(",")[1];
+			selectionTable = selectionTableCheck.split(",")[0];
+			selectionTable2 = selectionTableCheck.split(",")[1];
 			//getting the proper selection Attribute in case of JOIN, as the
 			//selection attribute will be: tableName.selectionAttibute
-			selectionAttribute = selectionAttribute.split(".")[0];
+			selectionAttribute = selectionAttribute.split("\\.")[0];
 		}
 		//else get the only selection table there is
-		else {String selectionTable = selectionTableCheck;}
+		else {selectionTable = selectionTableCheck;}
 		
 		inputQuery = inputQuery.toLowerCase();
 		
+		chooseCalculationMethod(inputQuery, selectionAttribute, selectionTable, selectionTable2);
+	}
+	
+	private static void chooseCalculationMethod(String inputQuery, String selectionAttribute, String selectionTable, String selectionTable2) throws SQLException {
+		
 		//EQUIJOIN
 		if (inputQuery.contains("employee") && inputQuery.contains("engineer")) {
-			calculateCost_equiJoin_nestedLoop();
-			calculateCost_equiJoin_mergeJoin(selectionTable);
+			calculateCost_equiJoin_nestedLoop(selectionTable, selectionTable2);
+			calculateCost_equiJoin_mergeJoin(selectionTable, selectionTable2);
+			//calculateCost_equiJoin_nestedLoopIndex(selectionTable, selectionTable2, selectionAttribute)
 		}
 		//if SELECT and equality operator
 		else if (inputQuery.contains("=")) {
 			
 			if (dataBuffer.getStatsOfAttributes().get(selectionAttribute).indexType == null) {
-				
-			}
-			
-			//is it selection on primary key?
-			if (dataBuffer.getStatsOfAttributes().get(selectionAttribute).indexType.equalsIgnoreCase("primary")) {
-				System.out.println( calculateCost_PrimaryKey_EqualityOperator_UsingFileScan(selectionTable) );
-				System.out.println(calculateCost_PrimaryKey_EqualityOperator_UsingIndex(selectionAttribute)); 
-				System.out.println(calculateCost_equalityHashing());
-			}
-			else {
 				calculateCost_nonPrimaryKey_equalityOperator_UsingFileScan(selectionTable);
-				calculateCost_nonPrimaryKey_EqualityOperator_UsingIndex();
+			}
+			//is it selection on primary key?
+			else if (dataBuffer.getStatsOfAttributes().get(selectionAttribute).indexType.equalsIgnoreCase("primary")) {
+				calculateCost_PrimaryKey_EqualityOperator_UsingFileScan(selectionTable);
+				calculateCost_PrimaryKey_EqualityOperator_UsingIndex(selectionAttribute); 
+				calculateCost_equalityHashing();
+			}
+			else if (dataBuffer.getStatsOfAttributes().get(selectionAttribute).indexType.equals("secondary")){
+				calculateCost_nonPrimaryKey_equalityOperator_UsingFileScan(selectionTable);
+				calculateCost_nonPrimaryKey_EqualityOperator_UsingIndex(selectionAttribute);
 			}
 				
 		}
 		//if SELECT and range operator
 		else if (inputQuery.contains(">") || inputQuery.contains("<")) {
+			//if no index
+			if (dataBuffer.getStatsOfAttributes().get(selectionAttribute).indexType == null) {
+				calculateCost_nonPrimaryKey_rangeOperator_UsingFileScan(selectionTable);
+			}
 			//is it selection on primary key?
 			if (dataBuffer.getStatsOfAttributes().get(selectionAttribute).indexType.equalsIgnoreCase("primary")) {
-				System.out.println(calculateCost_PrimaryKey_RangeOperator_UsingFileScan()); 
-				calculateCost_PrimaryKey_RangeOperator_UsingIndex(selectionTable);//?????
+				calculateCost_PrimaryKey_RangeOperator_UsingFileScan(selectionTable); 
+				calculateCost_PrimaryKey_RangeOperator_UsingIndex(selectionTable, selectionAttribute);//?????
 			}
 			else {
-				calculateCost_nonPrimaryKey_rangeOperator_UsingFileScan();
-				calculateCost_nonPrimaryKey_rangeOperator_UsingIndex();
+				calculateCost_nonPrimaryKey_rangeOperator_UsingFileScan(selectionTable);
+				calculateCost_nonPrimaryKey_rangeOperator_UsingIndex(selectionTable, selectionAttribute);
 			}
 		}
+		
 	}
 	
 	//a1 completed
-	public static String calculateCost_PrimaryKey_EqualityOperator_UsingIndex(String selectionAttribute) throws SQLException {
+	public static void calculateCost_PrimaryKey_EqualityOperator_UsingIndex(String selectionAttribute) throws SQLException {
 		// Primary index: height + 1
 		int height = dataBuffer.getStatsOfAttributes().get(selectionAttribute).treeHeight;
 		int cost = height + 1;
-		String result = "Primary index: " + cost;
-		return result;
+		System.out.println("cost of using Primary index (b+ tree): " + cost);
+
 	}
 
 	//a2 completed 
-	public static String calculateCost_PrimaryKey_EqualityOperator_UsingFileScan(String tableName) throws SQLException {
+	public static void calculateCost_PrimaryKey_EqualityOperator_UsingFileScan(String tableName) throws SQLException {
 //			Linear search: b/2,
 //			Binary search: log2b
 //			Using both algorithms in this method
@@ -86,66 +98,59 @@ public class QueryUtility {
 		int linearSearch = (int) Math.ceil(blocks/2);
 		int binarySearch = (int) Math.ceil(Math.log(blocks) / Math.log(2));
 		
-		String result = "Linear Search: " + linearSearch + "\n" + "Binary Search: " + binarySearch + "\n";
-		
-		return result;
+		System.out.println("cost of using Linear Search: " + linearSearch + "\n" + "cost of using Binary Search: " + binarySearch);
+
 	}
 	
-	//b1
-	public static String calculateCost_PrimaryKey_RangeOperator_UsingIndex(String selectionTable, String selectionAttribute) throws SQLException {
+	//b1 need to check the formula with hassam
+	public static void calculateCost_PrimaryKey_RangeOperator_UsingIndex(String selectionTable, String selectionAttribute) throws SQLException {
 		
 		// B-tree: Height + numOfBlocksOfRecords in the range
 		int height = dataBuffer.getStatsOfAttributes().get(selectionAttribute).treeHeight;
-		int blocking_Factor = dataBuffer.getStatsOfTables().get(selectionTable).bfr;
-		int cost = height + blocking_Factor;
-		String result = "B+-Tree: " + cost;
-		return result;
+		int numBlocks = dataBuffer.getStatsOfTables().get(selectionTable).numOfBlocks / 2;
+		int cost = height + numBlocks;
+		System.out.println("cost of using B+-Tree: " + cost);
 		 
 	}
-	//b2
-	public static String calculateCost_PrimaryKey_RangeOperator_UsingFileScan(String selectionTable) throws SQLException {
+	//b2 completed
+	public static void calculateCost_PrimaryKey_RangeOperator_UsingFileScan(String selectionTable) throws SQLException {
 		int blocks = dataBuffer.getStatsOfTables().get(selectionTable).numOfBlocks/2;
-		String result = "Linear search: " + blocks;
-		return result;
+		System.out.println("cost of using Linear search: " + blocks);
 	}
 	//c1
-	public static String calculateCost_nonPrimaryKey_EqualityOperator_UsingIndex(String selectionTable) throws SQLException {
-		int blocks = dataBuffer.getStatsOfTables().get(selectionTable).numOfBlocks/2;
-		String result = "Linear search: " + blocks;
-		return result;
+	public static void calculateCost_nonPrimaryKey_EqualityOperator_UsingIndex(String selectionAttribute) throws SQLException {
+		//using b+ tree: x + 1 + s
+		int x = dataBuffer.getStatsOfAttributes().get(selectionAttribute).treeHeight;
+		//s = selection cardinality
+		int s = 0;
+		int cost = x + 1 + s;
+		System.out.println("cost of using index (b+ tree): " + cost);
 	}
-	//c2
-	public static String calculateCost_nonPrimaryKey_equalityOperator_UsingFileScan(String selectionTable) {
+	//c2 completed
+	public static void calculateCost_nonPrimaryKey_equalityOperator_UsingFileScan(String selectionTable) throws SQLException {
 		
 		// Linear Search: b
-		// Binary Search: log2b + (s/bfr) - 1
 		int blocks = dataBuffer.getStatsOfTables().get(selectionTable).numOfBlocks;
-		int linearSearch = (int) Math.ceil(blocks);
-		int blocking_factor = dataBuffer.getStatsOfTables().get(selectionTable).bfr;
-		//need to find "s" in the next line
-		int binarySearch = (int) ((Math.ceil(Math.log(blocks) / Math.log(2))) + (s / blocking_factor) - 1);
+		int linearSearch = (int) Math.ceil(blocks/2);
 
-		String result = "Linear Search: " + linearSearch + "\n" + "Binary Search: " + binarySearch + "\n";
-		return result;
+		System.out.println("cost of using Linear Search: " + linearSearch);
 		
 	}
 	//d1 TODO apply the correct cost formula
-	public static String calculateCost_nonPrimaryKey_rangeOperator_UsingIndex(String selectionTable, String selectionAttribute) throws SQLException {
+	public static void calculateCost_nonPrimaryKey_rangeOperator_UsingIndex(String selectionTable, String selectionAttribute) throws SQLException {
 		//1.	B+ tree: x + (bi1/2) + (r/2)
 		int height = dataBuffer.getStatsOfAttributes().get(selectionAttribute).treeHeight;
 		int blocking_Factor = dataBuffer.getStatsOfTables().get(selectionTable).bfr;
 		int cost = height + blocking_Factor;
-		String result = "B+-Tree: " + cost;
-		return result;
+		System.out.println("cost of using B+-Tree: " + cost);
 	}
-	//d2
-	public static String calculateCost_nonPrimaryKey_rangeOperator_UsingFileScan(String selectionTable) throws SQLException {
+	//d2 completed
+	public static void calculateCost_nonPrimaryKey_rangeOperator_UsingFileScan(String selectionTable) throws SQLException {
 		int blocks = dataBuffer.getStatsOfTables().get(selectionTable).numOfBlocks/2;
-		String result = "Linear search: " + blocks;
-		return result;
+		System.out.println("cost of using Linear search: " + blocks);
 	}
 	//e1 completed
-	public static String calculateCost_equiJoin_nestedLoop(String selectionTable, String selectionTable2) throws SQLException {
+	public static void calculateCost_equiJoin_nestedLoop(String selectionTable, String selectionTable2) throws SQLException {
 		// Assuming Buffer (nB) size to 32;
 		int nB = 32;
 		//getting total number of blocks of tables that are JOINED
@@ -159,11 +164,11 @@ public class QueryUtility {
 		//assuming bfr Of Resultant Table as 3
 		int bfrOfResultantTable = 3;
 		int cost = (int) (B + ((B/(nB-2))*B2) + ((js * BNumRecords * B2NumRecords)/bfrOfResultantTable));
-		String result = "Nested-Loop: " + cost;
-		return result;
+		System.out.println("Cost of using nested-loop: " + cost);
+
 	}
 	//e2 completed
-	public static String calculateCost_equiJoin_mergeJoin(String selectionTable, String selectionTable2) throws SQLException {
+	public static void calculateCost_equiJoin_mergeJoin(String selectionTable, String selectionTable2) throws SQLException {
 		//getting total number of blocks of tables that are JOINED
 		int B = dataBuffer.getStatsOfTables().get(selectionTable).numOfBlocks;
 		int B2 = dataBuffer.getStatsOfTables().get(selectionTable2).numOfBlocks;
@@ -175,12 +180,12 @@ public class QueryUtility {
 		//js = 1, since the NDV(primaryKey,selectionTable) on both tables is 1, so 1/1 = 1
 		int js = 1;
 		int cost = B + B2 + ((js * BNumRecords * B2NumRecords)/bfrOfResultantTable);
-		String result = "Sort-merge Join: " + cost;
-		return result;
+		System.out.println("Cost of using Sort-merge Join: " + cost);
+
 	
 	}
 	//e3
-	public static String calculateCost_equiJoin_nestedLoopIndex(String selectionTable, String selectionTable2, String selectionAttribute) throws SQLException {
+	public static void calculateCost_equiJoin_nestedLoopIndex(String selectionTable, String selectionTable2, String selectionAttribute) throws SQLException {
 		//getting total number of blocks of tables that are JOINED
 		int B = dataBuffer.getStatsOfTables().get(selectionTable).numOfBlocks;
 		int B2 = dataBuffer.getStatsOfTables().get(selectionTable2).numOfBlocks;
@@ -194,14 +199,14 @@ public class QueryUtility {
 		//getting tree height of index on B
 		int x = dataBuffer.getStatsOfAttributes().get(selectionAttribute).treeHeight;
 		//need to add s to the cost function
+		int s = 0;
 		int cost = B + (B2NumRecords * (x + 1 + s)) + ((js * BNumRecords * B2NumRecords)/bfrOfResultantTable);
-		String result = "Sort-merge Join: " + cost;
-		return result;
+		System.out.println("cost of using nested-loop with index: " + cost);
 	
 	}
-	//for equality hash
-	public static int calculateCost_equalityHashing() {
-		return 1;
+	//for equality hash: completed
+	public static void calculateCost_equalityHashing() {
+		System.out.println("cost of using hashing: " + 1);
 	}
 
 

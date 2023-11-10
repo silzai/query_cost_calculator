@@ -6,7 +6,6 @@ repositories {
     mavenCentral()
 }
 
-
 dependencies {
    // Get the 19.18.0.0 Oracle JDBC driver along with other companion jars
     implementation("com.oracle.database.jdbc:ojdbc8-production:19.18.0.0")
