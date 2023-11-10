@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Basil/Downloads/ojdbc8-full/ojdbc8-full/ojdbc8.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Basil/Downloads/ojdbc8-full/ojdbc8-full/ons.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Basil/Downloads/ojdbc8-full/ojdbc8-full/oraclepki.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Basil/Downloads/ojdbc8-full/ojdbc8-full/orai18n.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Basil/Downloads/ojdbc8-full/ojdbc8-full/osdt_cert.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Basil/Downloads/ojdbc8-full/ojdbc8-full/osdt_core.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Basil/Downloads/ojdbc8-full/ojdbc8-full/simplefan.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Basil/Downloads/ojdbc8-full/ojdbc8-full/ucp.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Basil/Downloads/ojdbc8-full/ojdbc8-full/xdb6.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
