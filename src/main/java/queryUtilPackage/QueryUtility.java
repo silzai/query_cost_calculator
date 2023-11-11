@@ -67,7 +67,7 @@ public class QueryUtility {
 				calculateCost_nonPrimaryKey_rangeOperator_UsingFileScan(selectionTable);
 			}
 			//is it selection on primary key?
-			if (dataBuffer.getStatsOfAttributes().get(selectionAttribute).indexType.equalsIgnoreCase("primary")) {
+			else if (dataBuffer.getStatsOfAttributes().get(selectionAttribute).indexType.equalsIgnoreCase("primary")) {
 				calculateCost_PrimaryKey_RangeOperator_UsingFileScan(selectionTable); 
 				calculateCost_PrimaryKey_RangeOperator_UsingIndex(selectionTable, selectionAttribute);//?????
 			}
@@ -94,17 +94,19 @@ public class QueryUtility {
 //			Binary search: log2b
 //			Using both algorithms in this method
 		double blocks = dataBuffer.getStatsOfTables().get(tableName).numOfBlocks;
-		
-		int linearSearch = (int) Math.ceil(blocks/2);
+		int linearSearchWorstCase = (int) Math.ceil(blocks);
+		int linearSearchAvgCase = (int) Math.ceil(blocks/2);
 		int binarySearch = (int) Math.ceil(Math.log(blocks) / Math.log(2));
 		
-		System.out.println("cost of using Linear Search: " + linearSearch + "\n" + "cost of using Binary Search: " + binarySearch);
+		System.out.println("cost of using Linear Search avg case: " + 
+		linearSearchAvgCase + "\n" + "cost of using Linear Search worst case: " + 
+				linearSearchWorstCase + "\n" + "cost of using Binary Search: " + binarySearch);
 
 	}
 	
-	//b1 need to check the formula with hassam
+	//b1 completed
 	public static void calculateCost_PrimaryKey_RangeOperator_UsingIndex(String selectionTable, String selectionAttribute) throws SQLException {
-		
+
 		// B-tree: Height + numOfBlocksOfRecords in the range
 		int height = dataBuffer.getStatsOfAttributes().get(selectionAttribute).treeHeight;
 		int numBlocks = dataBuffer.getStatsOfTables().get(selectionTable).numOfBlocks / 2;
@@ -114,8 +116,11 @@ public class QueryUtility {
 	}
 	//b2 completed
 	public static void calculateCost_PrimaryKey_RangeOperator_UsingFileScan(String selectionTable) throws SQLException {
-		int blocks = dataBuffer.getStatsOfTables().get(selectionTable).numOfBlocks/2;
-		System.out.println("cost of using Linear search: " + blocks);
+		double blocks = dataBuffer.getStatsOfTables().get(selectionTable).numOfBlocks;
+		int linearSearchWorstCase = (int) Math.ceil(blocks);
+		int linearSearchAvgCase = (int) Math.ceil(blocks/2);
+		System.out.println("cost of using Linear search avg case: " + linearSearchAvgCase + "\n" + 
+		"cost of using Linear Search worst case: " + linearSearchWorstCase);
 	}
 	//c1
 	public static void calculateCost_nonPrimaryKey_EqualityOperator_UsingIndex(String selectionAttribute) throws SQLException {
@@ -130,24 +135,31 @@ public class QueryUtility {
 	public static void calculateCost_nonPrimaryKey_equalityOperator_UsingFileScan(String selectionTable) throws SQLException {
 		
 		// Linear Search: b
-		int blocks = dataBuffer.getStatsOfTables().get(selectionTable).numOfBlocks;
-		int linearSearch = (int) Math.ceil(blocks/2);
+		double blocks = dataBuffer.getStatsOfTables().get(selectionTable).numOfBlocks;
+		int linearSearchWorstCase = (int) Math.ceil(blocks);
+		int linearSearchAvgCase = (int) Math.ceil(blocks/2);
 
-		System.out.println("cost of using Linear Search: " + linearSearch);
+		System.out.println("cost of using Linear Search avg case: " + linearSearchAvgCase +
+				"cost of using Linear Search worst case: " + linearSearchWorstCase);
 		
 	}
-	//d1 TODO apply the correct cost formula
+	//d1 completed
 	public static void calculateCost_nonPrimaryKey_rangeOperator_UsingIndex(String selectionTable, String selectionAttribute) throws SQLException {
-		//1.	B+ tree: x + (bi1/2) + (r/2)
+		//B+ tree cost: x + (bi1/2) + (r/2)
+		//bi1 (first level index blocks): The method to find this is given no where in the book, so we assumed a value
+		int bi1 = 4;
 		int height = dataBuffer.getStatsOfAttributes().get(selectionAttribute).treeHeight;
-		int blocking_Factor = dataBuffer.getStatsOfTables().get(selectionTable).bfr;
-		int cost = height + blocking_Factor;
+		int r = dataBuffer.getStatsOfTables().get(selectionTable).numOfRecords;
+		int cost = height + (bi1/2) + (r/2);
 		System.out.println("cost of using B+-Tree: " + cost);
 	}
 	//d2 completed
 	public static void calculateCost_nonPrimaryKey_rangeOperator_UsingFileScan(String selectionTable) throws SQLException {
-		int blocks = dataBuffer.getStatsOfTables().get(selectionTable).numOfBlocks/2;
-		System.out.println("cost of using Linear search: " + blocks);
+		double blocks = dataBuffer.getStatsOfTables().get(selectionTable).numOfBlocks;
+		int linearSearchWorstCase = (int) Math.ceil(blocks);
+		int linearSearchAvgCase = (int) Math.ceil(blocks/2);
+		System.out.println("cost of using Linear Search avg case: " + linearSearchAvgCase +
+				"cost of using Linear Search worst case: " + linearSearchWorstCase);
 	}
 	//e1 completed
 	public static void calculateCost_equiJoin_nestedLoop(String selectionTable, String selectionTable2) throws SQLException {
@@ -182,7 +194,6 @@ public class QueryUtility {
 		int cost = B + B2 + ((js * BNumRecords * B2NumRecords)/bfrOfResultantTable);
 		System.out.println("Cost of using Sort-merge Join: " + cost);
 
-	
 	}
 	//e3
 	public static void calculateCost_equiJoin_nestedLoopIndex(String selectionTable, String selectionTable2, String selectionAttribute) throws SQLException {
