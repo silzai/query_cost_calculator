@@ -1,33 +1,29 @@
-- To make changes:
-1) "pull" the repo to your local machine by:
-```
-git pull <yourRemoteName> master 
-```
-2) then to push your changes to here:
-```
-git push <yourRemoteName>
-```     
 # QueryCostCalculator, Salam to all :D
 ## There are 2 parts: 
 1) Create metadata
-2) Code the cost calculator 
-## create metadata:
-- need to create metadata for the tables and records
-## code the cost calculator:
-- input: a query
-- output:
-  - 1st line for printing general query info/stats
-  - rest of the lines for printing different enumerations of plans, and their cost 
+2) Code the cost calculator
 
-Checklist (note: there doesn't need to be a class for each, and you may add any additional thing to the checklist):
+>[!warning]
+>The input query format **must** be as follows (taking care of where to put spaces):
+> - For selection on 1 table:
+>```plsql
+>SELECT * FROM tableName WHERE attribute = "theAttribute"
+>```
+>- For selection on 2 tables (JOIN):
+>```plsql
+>SELECT * FROM tableName1,tableName2 WHERE tableName1.attribute = tableName2.attribute
+>```
+>- We will NOT put a semicolon at the end of the query (;)
 
-1) ~create tables~
-2) ~Class for main menu to write the query (user interface) also has utility function for displaying stats for relations~
-3) Class for reading the database (JDBC)
-4) Class for parsing the query
-5) Class for enumerating each query plan
-6) Class for calculating the cost of a query plan using metadata
-7) print the query plan plus the cost
+>[!warning]
+>We are not considering cost of PROJECT operation, so all selection on attributes will return same cost as selecting from * (wildcard operator)
+
+>[!warning]
+>- Did not use CS2 cost formula because our tables are only sorted (ordering field is) on primary keys, which does not contain same values.
+>
+
+>[!warning]
+>- Did not use S5 cost formula because our tables are sorted on (ordering field is) on primary key (no clustering index), which does not contain the same values.
 
 
 
