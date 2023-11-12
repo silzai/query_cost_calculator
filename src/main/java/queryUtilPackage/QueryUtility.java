@@ -122,18 +122,12 @@ public class QueryUtility {
 		System.out.println("cost of using Linear search avg case: " + linearSearchAvgCase + "\n" + "\n" + 
 		"cost of using Linear Search worst case: " + linearSearchWorstCase);
 	}
-	//c1 ???/
+	//c1 
 	public static void calculateCost_nonPrimaryKey_EqualityOperator_UsingIndex(String selectionAttribute) throws SQLException {
 		//using b+ tree: x + 1 + s
 		int x = dataBuffer.getStatsOfAttributes().get(selectionAttribute).treeHeight;
 		//s = selection cardinality
-		int s;
-		if( dataBuffer.getStatsOfAttributes().get(selectionAttribute).attributeName == "ssn") {
-			s = 1;
-		}
-		else {
-			s =2;
-		}
+		int s = 2;
 		int cost = x + 1 + s;
 		System.out.println("cost of using index (b+ tree): " + cost);
 	}
