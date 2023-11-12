@@ -24,7 +24,7 @@ public class QueryUtility {
 			selectionTable2 = selectionTableCheck.split(",")[1];
 			//getting the proper selection Attribute in case of JOIN, as the
 			//selection attribute will be: tableName.selectionAttibute
-			selectionAttribute = selectionAttribute.split("\\.")[0];
+			selectionAttribute = selectionAttribute.split("\\.")[1];
 		}
 		//else get the only selection table there is
 		else {selectionTable = selectionTableCheck;}
@@ -40,7 +40,7 @@ public class QueryUtility {
 		if (inputQuery.contains("employee") && inputQuery.contains("engineer")) {
 			calculateCost_equiJoin_nestedLoop(selectionTable, selectionTable2);
 			calculateCost_equiJoin_mergeJoin(selectionTable, selectionTable2);
-			//calculateCost_equiJoin_nestedLoopIndex(selectionTable, selectionTable2, selectionAttribute)
+			calculateCost_equiJoin_nestedLoopIndex(selectionTable, selectionTable2, selectionAttribute);
 		}
 		//if SELECT and equality operator
 		else if (inputQuery.contains("=")) {
@@ -99,7 +99,7 @@ public class QueryUtility {
 		int binarySearch = (int) Math.ceil(Math.log(blocks) / Math.log(2));
 		
 		System.out.println("cost of using Linear Search avg case: " + 
-		linearSearchAvgCase + "\n" + "cost of using Linear Search worst case: " + 
+		linearSearchAvgCase + "\n" + "\n" + "cost of using Linear Search worst case: " + 
 				linearSearchWorstCase + "\n" + "cost of using Binary Search: " + binarySearch);
 
 	}
@@ -119,7 +119,7 @@ public class QueryUtility {
 		double blocks = dataBuffer.getStatsOfTables().get(selectionTable).numOfBlocks;
 		int linearSearchWorstCase = (int) Math.ceil(blocks);
 		int linearSearchAvgCase = (int) Math.ceil(blocks/2);
-		System.out.println("cost of using Linear search avg case: " + linearSearchAvgCase + "\n" + 
+		System.out.println("cost of using Linear search avg case: " + linearSearchAvgCase + "\n" + "\n" + 
 		"cost of using Linear Search worst case: " + linearSearchWorstCase);
 	}
 	//c1
@@ -139,7 +139,7 @@ public class QueryUtility {
 		int linearSearchWorstCase = (int) Math.ceil(blocks);
 		int linearSearchAvgCase = (int) Math.ceil(blocks/2);
 
-		System.out.println("cost of using Linear Search avg case: " + linearSearchAvgCase +
+		System.out.println("cost of using Linear Search avg case: " + linearSearchAvgCase + "\n" +
 				"cost of using Linear Search worst case: " + linearSearchWorstCase);
 		
 	}
@@ -158,7 +158,7 @@ public class QueryUtility {
 		double blocks = dataBuffer.getStatsOfTables().get(selectionTable).numOfBlocks;
 		int linearSearchWorstCase = (int) Math.ceil(blocks);
 		int linearSearchAvgCase = (int) Math.ceil(blocks/2);
-		System.out.println("cost of using Linear Search avg case: " + linearSearchAvgCase +
+		System.out.println("cost of using Linear Search avg case: " + linearSearchAvgCase + "\n" +
 				"cost of using Linear Search worst case: " + linearSearchWorstCase);
 	}
 	//e1 completed
@@ -194,6 +194,7 @@ public class QueryUtility {
 		int cost = B + B2 + ((js * BNumRecords * B2NumRecords)/bfrOfResultantTable);
 		System.out.println("Cost of using Sort-merge Join: " + cost);
 
+	
 	}
 	//e3
 	public static void calculateCost_equiJoin_nestedLoopIndex(String selectionTable, String selectionTable2, String selectionAttribute) throws SQLException {
@@ -210,7 +211,7 @@ public class QueryUtility {
 		//getting tree height of index on B
 		int x = dataBuffer.getStatsOfAttributes().get(selectionAttribute).treeHeight;
 		//need to add s to the cost function
-		int s = 0;
+		int s = 2;
 		int cost = B + (B2NumRecords * (x + 1 + s)) + ((js * BNumRecords * B2NumRecords)/bfrOfResultantTable);
 		System.out.println("cost of using nested-loop with index: " + cost);
 	
