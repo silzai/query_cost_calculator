@@ -111,7 +111,7 @@ public class QueryUtility {
 		int height = dataBuffer.getStatsOfAttributes().get(selectionAttribute).treeHeight;
 		int numBlocks = dataBuffer.getStatsOfTables().get(selectionTable).numOfBlocks / 2;
 		int cost = height + numBlocks;
-		System.out.println("cost of using B+-Tree: " + cost);
+		System.out.println("cost of using B+-Tree: " + cost );
 		 
 	}
 	//b2 completed
@@ -122,12 +122,18 @@ public class QueryUtility {
 		System.out.println("cost of using Linear search avg case: " + linearSearchAvgCase + "\n" + "\n" + 
 		"cost of using Linear Search worst case: " + linearSearchWorstCase);
 	}
-	//c1
+	//c1 ???/
 	public static void calculateCost_nonPrimaryKey_EqualityOperator_UsingIndex(String selectionAttribute) throws SQLException {
 		//using b+ tree: x + 1 + s
 		int x = dataBuffer.getStatsOfAttributes().get(selectionAttribute).treeHeight;
 		//s = selection cardinality
-		int s = 0;
+		int s;
+		if( dataBuffer.getStatsOfAttributes().get(selectionAttribute).attributeName == "ssn") {
+			s = 1;
+		}
+		else {
+			s =2;
+		}
 		int cost = x + 1 + s;
 		System.out.println("cost of using index (b+ tree): " + cost);
 	}
@@ -139,7 +145,11 @@ public class QueryUtility {
 		int linearSearchWorstCase = (int) Math.ceil(blocks);
 		int linearSearchAvgCase = (int) Math.ceil(blocks/2);
 
+<<<<<<< HEAD
 		System.out.println("cost of using Linear Search avg case: " + linearSearchAvgCase + "\n" +
+=======
+		System.out.println("cost of using Linear Search avg case: " + linearSearchAvgCase +"\n"+
+>>>>>>> branch 'master' of https://github.com/silzai/query_cost_calculator.git
 				"cost of using Linear Search worst case: " + linearSearchWorstCase);
 		
 	}
@@ -158,7 +168,11 @@ public class QueryUtility {
 		double blocks = dataBuffer.getStatsOfTables().get(selectionTable).numOfBlocks;
 		int linearSearchWorstCase = (int) Math.ceil(blocks);
 		int linearSearchAvgCase = (int) Math.ceil(blocks/2);
+<<<<<<< HEAD
 		System.out.println("cost of using Linear Search avg case: " + linearSearchAvgCase + "\n" +
+=======
+		System.out.println("cost of using Linear Search avg case: " + linearSearchAvgCase +"\n"+
+>>>>>>> branch 'master' of https://github.com/silzai/query_cost_calculator.git
 				"cost of using Linear Search worst case: " + linearSearchWorstCase);
 	}
 	//e1 completed
@@ -210,8 +224,18 @@ public class QueryUtility {
 		int js = 1;
 		//getting tree height of index on B
 		int x = dataBuffer.getStatsOfAttributes().get(selectionAttribute).treeHeight;
+<<<<<<< HEAD
 		//need to add s to the cost function
 		int s = 2;
+=======
+		//s = selection cardinality
+		int s;
+		if( dataBuffer.getStatsOfAttributes().get(selectionAttribute).attributeName == "ssn") {
+			s = 1;}
+		else {
+			s =2;}
+		
+>>>>>>> branch 'master' of https://github.com/silzai/query_cost_calculator.git
 		int cost = B + (B2NumRecords * (x + 1 + s)) + ((js * BNumRecords * B2NumRecords)/bfrOfResultantTable);
 		System.out.println("cost of using nested-loop with index: " + cost);
 	
